@@ -8,12 +8,6 @@ Run a single command inside any git repository to get an instant visual dashboar
   <img src="screen_capture.png" alt="who_made_what dashboard" width="800" />
 </p>
 
-This package is published to [GitHub Packages](https://github.com/lab34/who-made-what/packages).
-
-```
-npx @lab34/who-made-what@latest
-```
-
 ## What it does
 
 `who_made_what` scans the git history of your repository and launches a local web dashboard with:
