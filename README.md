@@ -5,7 +5,7 @@ Git repository contribution report — who produces what.
 Run a single command inside any git repository to get an instant visual dashboard of contribution activity, author statistics, and file-level insights.
 
 <p align="center">
-  <img src="screen_capture.png" alt="who_made_what dashboard" width="800" />
+  <img src="screen_capture.png" alt="who_made_what dashboard" width="800" style="border: 1px solid #d0d7de; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);" />
 </p>
 
 ## What it does
