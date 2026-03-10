@@ -1,6 +1,6 @@
 {
   "name": "@lab34/who-made-what",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Git repository contribution report — who produces what",
   "type": "module",
   "bin": {
@@ -18,7 +18,9 @@
     "build:client": "vite build --config client/vite.config.js",
     "build": "vite build --config client/vite.config.js",
     "prepublishOnly": "npm run build",
-    "start": "node bin/cli.js"
+    "start": "node bin/cli.js",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:coverage": "node --experimental-vm-modules node_modules/.bin/jest --coverage"
   },
   "keywords": [
     "git",
@@ -43,10 +45,12 @@
   "devDependencies": {
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
+    "@jest/globals": "^30.3.0",
     "@mui/icons-material": "^6.1.0",
     "@mui/joy": "^5.0.0-beta.48",
     "@vitejs/plugin-react": "^4.3.0",
     "concurrently": "^9.1.0",
+    "jest": "^30.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "recharts": "^2.13.0",
