@@ -7,7 +7,7 @@ import App from './App';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <CssVarsProvider theme={theme} defaultMode="dark">
+    <CssVarsProvider theme={theme} defaultMode="light">
       <CssBaseline />
       <App />
     </CssVarsProvider>

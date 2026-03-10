@@ -4,8 +4,14 @@ Git repository contribution report — who produces what.
 
 Run a single command inside any git repository to get an instant visual dashboard of contribution activity, author statistics, and file-level insights.
 
+<p align="center">
+  <img src="screen_capture.png" alt="who_made_what dashboard" width="800" />
+</p>
+
+This package is published to [GitHub Packages](https://github.com/lab34/who-made-what/packages).
+
 ```
-npx @lab34/who_made_what@latest
+npx @lab34/who-made-what@latest
 ```
 
 ## What it does
@@ -25,12 +31,28 @@ npx @lab34/who_made_what@latest
 
 All data stays local. Nothing is sent to any external server.
 
+## Setup
+
+Since this package is hosted on GitHub Packages, you need to configure npm to resolve the `@lab34` scope from the GitHub registry.
+
+Add the following to your project or user-level `.npmrc`:
+
+```
+@lab34:registry=https://npm.pkg.github.com
+```
+
+If the package is private, you also need to authenticate by adding a GitHub Personal Access Token (with `read:packages` scope) to `~/.npmrc`:
+
+```
+//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
+```
+
 ## Usage
 
 Navigate to any git repository and run:
 
 ```bash
-npx @lab34/who_made_what@latest
+npx @lab34/who-made-what@latest
 ```
 
 This will:
@@ -43,7 +65,7 @@ This will:
 To use a specific port:
 
 ```bash
-PORT=8080 npx @lab34/who_made_what@latest
+PORT=8080 npx @lab34/who-made-what@latest
 ```
 
 ## Requirements
@@ -54,8 +76,8 @@ PORT=8080 npx @lab34/who_made_what@latest
 ## Development
 
 ```bash
-git clone <repo-url>
-cd monit
+git clone https://github.com/lab34/who-made-what.git
+cd who-made-what
 npm install
 npm run dev
 ```

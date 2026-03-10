@@ -1,5 +1,6 @@
 import express from 'express';
 import cors from 'cors';
+import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -26,14 +27,18 @@ app.use('/api/folders', foldersRouter);
 
 // --- Serve production frontend build ---
 const clientDist = path.resolve(__dirname, '..', '..', 'client', 'dist');
-app.use(express.static(clientDist));
-app.get('*', (_req, res, next) => {
-  // Only serve index.html for non-API routes
-  if (_req.path.startsWith('/api')) return next();
-  res.sendFile(path.join(clientDist, 'index.html'), (err) => {
-    if (err) next();
+
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  // SPA fallback: serve index.html for any non-API route
+  app.get('/{*splat}', (_req, res, next) => {
+    if (_req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(clientDist, 'index.html'));
   });
-});
+} else {
+  console.warn(`[warn] Frontend build not found at ${clientDist}`);
+  console.warn('[warn] Run "npm run build" to build the client.');
+}
 
 /**
  * Start the server on a random available port (or PORT env var).

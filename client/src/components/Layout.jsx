@@ -3,7 +3,10 @@ import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import IconButton from '@mui/joy/IconButton';
 import Tooltip from '@mui/joy/Tooltip';
+import { useColorScheme } from '@mui/joy/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import DarkModeIcon from '@mui/icons-material/DarkMode';
+import LightModeIcon from '@mui/icons-material/LightMode';
 import BranchFilter from './BranchFilter';
 import FolderBreadcrumb from './FolderBreadcrumb';
 import DateFilter from './DateFilter';
@@ -23,6 +26,12 @@ export default function Layout({
   sidebar,
   children,
 }) {
+  const { mode, setMode } = useColorScheme();
+
+  const toggleMode = () => {
+    setMode(mode === 'dark' ? 'light' : 'dark');
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: 'background.body' }}>
       {/* Header */}
@@ -39,7 +48,7 @@ export default function Layout({
           py: 1.5,
           bgcolor: 'background.surface',
           borderBottom: '1px solid',
-          borderColor: 'neutral.700',
+          borderColor: 'divider',
           backdropFilter: 'blur(8px)',
         }}
       >
@@ -70,6 +79,21 @@ export default function Layout({
           onChange={onBranchChange}
         />
 
+        <Tooltip
+          title={
+            mode === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+          }
+        >
+          <IconButton
+            variant="outlined"
+            color="neutral"
+            size="sm"
+            onClick={toggleMode}
+          >
+            {mode === 'dark' ? <LightModeIcon /> : <DarkModeIcon />}
+          </IconButton>
+        </Tooltip>
+
         <Tooltip title="Refresh data">
           <IconButton
             variant="outlined"
@@ -99,7 +123,7 @@ export default function Layout({
               width: 300,
               flexShrink: 0,
               borderRight: '1px solid',
-              borderColor: 'neutral.700',
+              borderColor: 'divider',
               overflowY: 'auto',
               position: 'sticky',
               top: 56,

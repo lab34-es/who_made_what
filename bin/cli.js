@@ -3,7 +3,7 @@
 import { execSync } from 'node:child_process';
 import { createRequire } from 'node:module';
 
-const repoRoot = process.cwd();
+const repoRoot = process.argv[2] || process.cwd();
 
 // --- Validate that CWD is inside a git repository ---
 try {
