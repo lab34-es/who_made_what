@@ -5,7 +5,7 @@ Git repository contribution report — who produces what.
 Run a single command inside any git repository to get an instant visual dashboard of contribution activity, author statistics, and file-level insights.
 
 <p align="center">
-  <img src="screen_capture.png" alt="who_made_what dashboard" width="800" style="border: 1px solid #d0d7de; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.12);" />
+  <img src="screen_capture.png" alt="who_made_what dashboard" width="800" />
 </p>
 
 ## What it does
@@ -49,10 +49,16 @@ node bin/cli.js <path of repository to explore>
 
 This will:
 
-1. Validate the target is a git repository
+1. Validate the current directory is a git repository
 2. Scan the full commit history
 3. Start a local server on a random available port
 4. Open the dashboard in your default browser
+
+To use a specific port:
+
+```bash
+PORT=8080 npx @lab34/who-made-what@latest
+```
 
 ## Requirements
 
