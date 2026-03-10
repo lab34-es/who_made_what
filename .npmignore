@@ -1,0 +1,15 @@
+# Source / dev files (not needed in published package)
+client/src/
+client/node_modules/
+client/package.json
+client/vite.config.js
+client/index.html
+
+server/package.json
+server/node_modules/
+
+# Dev tooling
+node_modules/
+bun.lock
+.git/
+.gitignore
