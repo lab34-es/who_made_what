@@ -1,0 +1,79 @@
+# who-made-what
+
+Git repository contribution report — who produces what.
+
+Run a single command inside any git repository to get an instant visual dashboard of contribution activity, author statistics, and file-level insights.
+
+```
+npx @lab34/who-made-what@latest
+```
+
+## What it does
+
+`who-made-what` scans the git history of your repository and launches a local web dashboard with:
+
+- **Contribution heatmap** — GitHub-style grid of daily commit counts over the last 52 weeks
+- **Commits timeline** — Area chart of commits per week
+- **Activity by day of week** — Bar chart showing when commits happen (Mon–Sun)
+- **Activity by hour** — Bar chart showing commit distribution across the 24-hour day
+- **Top files** — Most frequently modified files with commit counts and line changes
+- **Recent files** — Most recently updated files with author and timestamp
+- **Contributor list** — All authors with commit counts, lines added/removed, and relative activity; supports multi-select filtering
+- **Branch filter** — View data for a specific branch or all branches combined
+- **Folder navigation** — Drill into subdirectories to scope all metrics to a specific folder
+- **Date range filter** — Quick presets (24h, 7 days, month) or custom from/to dates
+
+All data stays local. Nothing is sent to any external server.
+
+## Usage
+
+Navigate to any git repository and run:
+
+```bash
+npx @lab34/who-made-what@latest
+```
+
+This will:
+
+1. Validate the current directory is a git repository
+2. Scan the full commit history
+3. Start a local server on a random available port
+4. Open the dashboard in your default browser
+
+To use a specific port:
+
+```bash
+PORT=8080 npx @lab34/who-made-what@latest
+```
+
+## Requirements
+
+- **Node.js** >= 18
+- **git** CLI installed and available in PATH
+
+## Development
+
+```bash
+git clone <repo-url>
+cd monit
+npm install
+npm run dev
+```
+
+This starts the Express API server (with `--watch` for auto-reload) and builds the client in development mode. The client dev server proxies API requests to the backend.
+
+To build the client for production:
+
+```bash
+npm run build
+```
+
+## How it works
+
+The tool shells out to the local `git` binary to parse branch lists, commit logs (with `--numstat`), and directory trees (`ls-tree`). All parsing happens in-process — there are no database dependencies or external services.
+
+The Express server serves both the REST API and the pre-built React SPA on a single port. The frontend uses MUI Joy for the UI components and Recharts for the visualizations.
+
+## License
+
+MIT
