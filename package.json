@@ -1,5 +1,5 @@
 {
-  "name": "who-made-what",
+  "name": "@lab34/who-made-what",
   "version": "1.0.0",
   "description": "Git repository contribution report — who produces what",
   "type": "module",
