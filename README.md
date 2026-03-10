@@ -43,24 +43,16 @@ If the package is private, you also need to authenticate by adding a GitHub Pers
 
 ## Usage
 
-Navigate to any git repository and run:
-
 ```bash
-npx @lab34/who-made-what@latest
+node bin/cli.js <path of repository to explore>
 ```
 
 This will:
 
-1. Validate the current directory is a git repository
+1. Validate the target is a git repository
 2. Scan the full commit history
 3. Start a local server on a random available port
 4. Open the dashboard in your default browser
-
-To use a specific port:
-
-```bash
-PORT=8080 npx @lab34/who-made-what@latest
-```
 
 ## Requirements
 
