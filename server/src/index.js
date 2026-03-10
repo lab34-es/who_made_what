@@ -66,5 +66,5 @@ const isDirectRun =
 
 if (isDirectRun) {
   const { port } = await startServer();
-  console.log(`\n  who-made-what server running at http://localhost:${port}\n`);
+  console.log(`\n  who_made_what server running at http://localhost:${port}\n`);
 }

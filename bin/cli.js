@@ -15,7 +15,7 @@ try {
 } catch {
   console.error(
     '\n  Error: The current directory is not a git repository.\n' +
-      '  Please run who-made-what from inside a git repository.\n',
+      '  Please run who_made_what from inside a git repository.\n',
   );
   process.exit(1);
 }
@@ -29,7 +29,7 @@ const { startServer } = await import('../server/src/index.js');
 const { port } = await startServer();
 
 const url = `http://localhost:${port}`;
-console.log(`\n  who-made-what running at ${url}\n`);
+console.log(`\n  who_made_what running at ${url}\n`);
 
 // Auto-open the browser
 try {

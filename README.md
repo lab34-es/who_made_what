@@ -1,16 +1,16 @@
-# who-made-what
+# who_made_what
 
 Git repository contribution report — who produces what.
 
 Run a single command inside any git repository to get an instant visual dashboard of contribution activity, author statistics, and file-level insights.
 
 ```
-npx @lab34/who-made-what@latest
+npx @lab34/who_made_what@latest
 ```
 
 ## What it does
 
-`who-made-what` scans the git history of your repository and launches a local web dashboard with:
+`who_made_what` scans the git history of your repository and launches a local web dashboard with:
 
 - **Contribution heatmap** — GitHub-style grid of daily commit counts over the last 52 weeks
 - **Commits timeline** — Area chart of commits per week
@@ -30,7 +30,7 @@ All data stays local. Nothing is sent to any external server.
 Navigate to any git repository and run:
 
 ```bash
-npx @lab34/who-made-what@latest
+npx @lab34/who_made_what@latest
 ```
 
 This will:
@@ -43,7 +43,7 @@ This will:
 To use a specific port:
 
 ```bash
-PORT=8080 npx @lab34/who-made-what@latest
+PORT=8080 npx @lab34/who_made_what@latest
 ```
 
 ## Requirements
