@@ -1,6 +1,6 @@
 {
   "name": "@lab34-es/who_made_what",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Git repository contribution report — who produces what",
   "type": "module",
   "bin": {
