@@ -71,12 +71,15 @@ router.get('/by-hour', (req, res) => {
 });
 
 router.get('/top-files', (req, res) => {
-  const { branch, author, limit, folder, since, until } = req.query;
+  const { branch, author, page, pageSize, folder, since, until } = req.query;
   res.json(
     cache.getTopFiles(
       branch || null,
       parseAuthor(author),
-      limit ? parseInt(limit, 10) : 20,
+      {
+        page: page ? parseInt(page, 10) : 1,
+        pageSize: pageSize ? parseInt(pageSize, 10) : 20,
+      },
       folder || null,
       since || null,
       until || null,
@@ -85,12 +88,15 @@ router.get('/top-files', (req, res) => {
 });
 
 router.get('/recent-files', (req, res) => {
-  const { branch, author, limit, folder, since, until } = req.query;
+  const { branch, author, page, pageSize, folder, since, until } = req.query;
   res.json(
     cache.getRecentFiles(
       branch || null,
       parseAuthor(author),
-      limit ? parseInt(limit, 10) : 20,
+      {
+        page: page ? parseInt(page, 10) : 1,
+        pageSize: pageSize ? parseInt(pageSize, 10) : 20,
+      },
       folder || null,
       since || null,
       until || null,

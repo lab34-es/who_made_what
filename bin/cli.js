@@ -1,29 +1,6 @@
 #!/usr/bin/env node
 
-import { execSync } from 'node:child_process';
-import { createRequire } from 'node:module';
-
-const repoRoot = process.argv[2] || process.cwd();
-
-// --- Validate that CWD is inside a git repository ---
-try {
-  execSync('git rev-parse --is-inside-work-tree', {
-    cwd: repoRoot,
-    encoding: 'utf-8',
-    stdio: ['pipe', 'pipe', 'pipe'],
-  });
-} catch {
-  console.error(
-    '\n  Error: The current directory is not a git repository.\n' +
-      '  Please run who_made_what from inside a git repository.\n',
-  );
-  process.exit(1);
-}
-
-// Make the repo root available to the server/parser
-process.env.WHO_MADE_WHAT_REPO_ROOT = repoRoot;
-
-// Start the server
+// Start the server — the user selects a repository folder via the UI.
 const { startServer } = await import('../server/src/index.js');
 
 const { port } = await startServer();

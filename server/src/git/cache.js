@@ -11,6 +11,7 @@ import {
   filterCommitsByFolder,
   filterCommitsByDate,
   listFolders,
+  getRepoRoot,
 } from './parser.js';
 
 class GitCache {
@@ -21,13 +22,27 @@ class GitCache {
     this.commitsByBranch = new Map();
     this.scannedAt = null;
     this.scanning = false;
+    /** Whether a repository has been scanned and data is available. */
+    this.repoReady = false;
+  }
+
+  /**
+   * Clear all cached data. Called when switching repositories.
+   */
+  reset() {
+    this.branches = [];
+    this.commitsByBranch = new Map();
+    this.scannedAt = null;
+    this.repoReady = false;
   }
 
   /**
    * Full scan of the repository.  Called once at startup and on POST /api/refresh.
+   * Skips silently if no repository root has been configured.
    */
   async scan() {
     if (this.scanning) return;
+    if (!getRepoRoot()) return;
     this.scanning = true;
     const t0 = Date.now();
 
@@ -49,6 +64,7 @@ class GitCache {
       this.commitsByBranch.set('__preloaded__', true);
 
       this.scannedAt = new Date().toISOString();
+      this.repoReady = true;
       console.log(`[cache] Scan complete in ${Date.now() - t0}ms`);
     } catch (err) {
       console.error('[cache] Scan failed:', err.message);
@@ -118,19 +134,19 @@ class GitCache {
     return buildByHour(this._filter(branch, folder, since, until), authorEmail);
   }
 
-  getTopFiles(branch, authorEmail, limit, folder, since, until) {
+  getTopFiles(branch, authorEmail, { page, pageSize }, folder, since, until) {
     return buildTopFiles(
       this._filter(branch, folder, since, until),
       authorEmail,
-      limit,
+      { page, pageSize },
     );
   }
 
-  getRecentFiles(branch, authorEmail, limit, folder, since, until) {
+  getRecentFiles(branch, authorEmail, { page, pageSize }, folder, since, until) {
     return buildRecentFiles(
       this._filter(branch, folder, since, until),
       authorEmail,
-      limit,
+      { page, pageSize },
     );
   }
 

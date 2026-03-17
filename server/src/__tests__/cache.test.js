@@ -13,6 +13,7 @@ const mockBuildRecentFiles = jest.fn();
 const mockFilterCommitsByFolder = jest.fn();
 const mockFilterCommitsByDate = jest.fn();
 const mockListFolders = jest.fn();
+const mockGetRepoRoot = jest.fn();
 
 jest.unstable_mockModule('../git/parser.js', () => ({
   parseBranches: mockParseBranches,
@@ -27,6 +28,7 @@ jest.unstable_mockModule('../git/parser.js', () => ({
   filterCommitsByFolder: mockFilterCommitsByFolder,
   filterCommitsByDate: mockFilterCommitsByDate,
   listFolders: mockListFolders,
+  getRepoRoot: mockGetRepoRoot,
 }));
 
 // Import cache after mocks are set up
@@ -66,6 +68,10 @@ describe('GitCache', () => {
     cache.commitsByBranch = new Map();
     cache.scannedAt = null;
     cache.scanning = false;
+    cache.repoReady = false;
+
+    // Default: repo root is configured (so scan() proceeds)
+    mockGetRepoRoot.mockReturnValue('/fake/repo');
 
     // Default filter pass-through behavior
     mockFilterCommitsByFolder.mockImplementation((commits) => commits);
@@ -97,6 +103,24 @@ describe('GitCache', () => {
       expect(mockParseBranches).not.toHaveBeenCalled();
     });
 
+    it('should skip scan when no repo root is configured', async () => {
+      mockGetRepoRoot.mockReturnValue(null);
+
+      await cache.scan();
+
+      expect(mockParseBranches).not.toHaveBeenCalled();
+      expect(cache.repoReady).toBe(false);
+    });
+
+    it('should set repoReady to true after successful scan', async () => {
+      mockParseBranches.mockReturnValue(['main']);
+      mockParseCommits.mockReturnValue(sampleCommits);
+
+      await cache.scan();
+
+      expect(cache.repoReady).toBe(true);
+    });
+
     it('should set scanning flag during scan and clear on completion', async () => {
       mockParseBranches.mockReturnValue([]);
       mockParseCommits.mockReturnValue([]);
@@ -117,6 +141,26 @@ describe('GitCache', () => {
 
       // Should not crash, scanning flag should be cleared
       expect(cache.scanning).toBe(false);
+    });
+  });
+
+  // ──────────────────────────────────────────────────────────────────────
+  // reset()
+  // ──────────────────────────────────────────────────────────────────────
+  describe('reset', () => {
+    it('should clear all cached data and set repoReady to false', async () => {
+      mockParseBranches.mockReturnValue(['main']);
+      mockParseCommits.mockReturnValue(sampleCommits);
+      await cache.scan();
+
+      expect(cache.repoReady).toBe(true);
+
+      cache.reset();
+
+      expect(cache.branches).toEqual([]);
+      expect(cache.commitsByBranch.size).toBe(0);
+      expect(cache.scannedAt).toBeNull();
+      expect(cache.repoReady).toBe(false);
     });
   });
 
@@ -282,26 +326,31 @@ describe('GitCache', () => {
     });
 
     it('getTopFiles delegates to buildTopFiles', () => {
-      const expected = [{ path: 'a.js', commits: 5 }];
+      const expected = { data: [{ path: 'a.js', commits: 5 }], total: 1, page: 1, pageSize: 10 };
       mockBuildTopFiles.mockReturnValue(expected);
 
-      const result = cache.getTopFiles(null, 'a@a.com', 10, null, null, null);
+      const result = cache.getTopFiles(null, 'a@a.com', { page: 1, pageSize: 10 }, null, null, null);
       expect(mockBuildTopFiles).toHaveBeenCalledWith(
         sampleCommits,
         'a@a.com',
-        10,
+        { page: 1, pageSize: 10 },
       );
       expect(result).toBe(expected);
     });
 
     it('getRecentFiles delegates to buildRecentFiles', () => {
-      const expected = [{ path: 'a.js', date: '2025-06-10' }];
+      const expected = {
+        data: [{ path: 'a.js', date: '2025-06-10' }],
+        total: 1,
+        page: 1,
+        pageSize: 10,
+      };
       mockBuildRecentFiles.mockReturnValue(expected);
 
       const result = cache.getRecentFiles(
         null,
         'a@a.com',
-        10,
+        { page: 1, pageSize: 10 },
         null,
         null,
         null,
@@ -309,7 +358,7 @@ describe('GitCache', () => {
       expect(mockBuildRecentFiles).toHaveBeenCalledWith(
         sampleCommits,
         'a@a.com',
-        10,
+        { page: 1, pageSize: 10 },
       );
       expect(result).toBe(expected);
     });

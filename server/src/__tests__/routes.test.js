@@ -4,7 +4,9 @@ import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 const mockCache = {
   branches: ['main', 'develop'],
   scannedAt: '2025-06-10T12:00:00.000Z',
+  repoReady: true,
   scan: jest.fn(),
+  reset: jest.fn(),
   getAuthors: jest.fn(),
   getHeatmap: jest.fn(),
   getTimeline: jest.fn(),
@@ -243,9 +245,9 @@ describe('routes', () => {
     });
 
     describe('GET /top-files', () => {
-      it('should call cache.getTopFiles with default limit', () => {
+      it('should call cache.getTopFiles with default pagination', () => {
         const handler = findHandler(activityRouter, 'get', '/top-files');
-        const mockData = [{ path: 'a.js', commits: 5 }];
+        const mockData = { data: [{ path: 'a.js', commits: 5 }], total: 1, page: 1, pageSize: 20 };
         mockCache.getTopFiles.mockReturnValue(mockData);
 
         const req = createReq({});
@@ -256,18 +258,18 @@ describe('routes', () => {
         expect(mockCache.getTopFiles).toHaveBeenCalledWith(
           null,
           null,
-          20,
+          { page: 1, pageSize: 20 },
           null,
           null,
           null,
         );
       });
 
-      it('should parse custom limit', () => {
+      it('should parse custom page and pageSize', () => {
         const handler = findHandler(activityRouter, 'get', '/top-files');
-        mockCache.getTopFiles.mockReturnValue([]);
+        mockCache.getTopFiles.mockReturnValue({ data: [], total: 0, page: 3, pageSize: 50 });
 
-        const req = createReq({ limit: '50' });
+        const req = createReq({ page: '3', pageSize: '50' });
         const res = createRes();
 
         handler(req, res);
@@ -275,7 +277,7 @@ describe('routes', () => {
         expect(mockCache.getTopFiles).toHaveBeenCalledWith(
           null,
           null,
-          50,
+          { page: 3, pageSize: 50 },
           null,
           null,
           null,
@@ -284,9 +286,14 @@ describe('routes', () => {
     });
 
     describe('GET /recent-files', () => {
-      it('should call cache.getRecentFiles with default limit', () => {
+      it('should call cache.getRecentFiles with default pagination', () => {
         const handler = findHandler(activityRouter, 'get', '/recent-files');
-        const mockData = [{ path: 'a.js', date: '2025-06-10' }];
+        const mockData = {
+          data: [{ path: 'a.js', date: '2025-06-10' }],
+          total: 1,
+          page: 1,
+          pageSize: 20,
+        };
         mockCache.getRecentFiles.mockReturnValue(mockData);
 
         const req = createReq({});
@@ -297,18 +304,23 @@ describe('routes', () => {
         expect(mockCache.getRecentFiles).toHaveBeenCalledWith(
           null,
           null,
-          20,
+          { page: 1, pageSize: 20 },
           null,
           null,
           null,
         );
       });
 
-      it('should parse custom limit', () => {
+      it('should parse custom page and pageSize', () => {
         const handler = findHandler(activityRouter, 'get', '/recent-files');
-        mockCache.getRecentFiles.mockReturnValue([]);
+        mockCache.getRecentFiles.mockReturnValue({
+          data: [],
+          total: 0,
+          page: 2,
+          pageSize: 50,
+        });
 
-        const req = createReq({ limit: '5' });
+        const req = createReq({ page: '2', pageSize: '50' });
         const res = createRes();
 
         handler(req, res);
@@ -316,7 +328,7 @@ describe('routes', () => {
         expect(mockCache.getRecentFiles).toHaveBeenCalledWith(
           null,
           null,
-          5,
+          { page: 2, pageSize: 50 },
           null,
           null,
           null,

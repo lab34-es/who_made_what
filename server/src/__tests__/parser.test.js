@@ -22,6 +22,8 @@ const {
   buildTopFiles,
   buildRecentFiles,
   listFolders,
+  setRepoRoot,
+  getRepoRoot,
 } = await import('../git/parser.js');
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -649,22 +651,26 @@ describe('parser', () => {
       const result = buildTopFiles(commits);
 
       // README.md appears in 2 commits, everything else in 1
-      expect(result[0].path).toBe('README.md');
-      expect(result[0].commits).toBe(2);
-      expect(result[0].added).toBe(17); // 2 + 15
-      expect(result[0].removed).toBe(6); // 1 + 5
+      expect(result.data[0].path).toBe('README.md');
+      expect(result.data[0].commits).toBe(2);
+      expect(result.data[0].added).toBe(17); // 2 + 15
+      expect(result.data[0].removed).toBe(6); // 1 + 5
+      expect(result).toHaveProperty('total');
+      expect(result).toHaveProperty('page', 1);
+      expect(result).toHaveProperty('pageSize', 20);
     });
 
-    it('should respect the limit parameter', () => {
-      const result = buildTopFiles(commits, null, 2);
-      expect(result).toHaveLength(2);
+    it('should respect the pageSize parameter', () => {
+      const result = buildTopFiles(commits, null, { page: 1, pageSize: 2 });
+      expect(result.data).toHaveLength(2);
+      expect(result.total).toBeGreaterThanOrEqual(2);
     });
 
     it('should filter by author', () => {
       const result = buildTopFiles(commits, 'alice@example.com');
 
       // Only Alice's files
-      const paths = result.map((f) => f.path);
+      const paths = result.data.map((f) => f.path);
       expect(paths).toContain('server/src/auth.js');
       expect(paths).toContain('server/src/index.js');
       expect(paths).toContain('server/src/utils.js');
@@ -676,14 +682,16 @@ describe('parser', () => {
     it('should filter by array of authors', () => {
       const result = buildTopFiles(commits, ['bob@example.com']);
 
-      const paths = result.map((f) => f.path);
+      const paths = result.data.map((f) => f.path);
       expect(paths).toContain('client/src/App.jsx');
       expect(paths).toContain('README.md');
       expect(paths).not.toContain('server/src/auth.js');
     });
 
-    it('should return empty array for empty commits', () => {
-      expect(buildTopFiles([])).toEqual([]);
+    it('should return empty data for empty commits', () => {
+      const result = buildTopFiles([]);
+      expect(result.data).toEqual([]);
+      expect(result.total).toBe(0);
     });
   });
 
@@ -697,35 +705,77 @@ describe('parser', () => {
       const result = buildRecentFiles(commits);
 
       // First file should be from the most recent commit
-      expect(result[0].date).toBe('2025-06-10T10:00:00+00:00');
-      expect(result[0].path).toBe('server/src/auth.js');
+      expect(result.data[0].date).toBe('2025-06-10T10:00:00+00:00');
+      expect(result.data[0].path).toBe('server/src/auth.js');
+      expect(result).toHaveProperty('total');
+      expect(result).toHaveProperty('page', 1);
+      expect(result).toHaveProperty('pageSize', 20);
     });
 
     it('should only include the most recent touch per file', () => {
       const result = buildRecentFiles(commits);
 
       // README.md appears in two commits; should only appear once
-      const readmeEntries = result.filter((f) => f.path === 'README.md');
+      const readmeEntries = result.data.filter(
+        (f) => f.path === 'README.md',
+      );
       expect(readmeEntries).toHaveLength(1);
       // Should be the most recent (ghi789 at 2025-06-05, not jkl012 at 2025-05-28)
       expect(readmeEntries[0].date).toBe('2025-06-05T09:15:00+00:00');
     });
 
-    it('should respect the limit parameter', () => {
-      const result = buildRecentFiles(commits, null, 2);
-      expect(result).toHaveLength(2);
+    it('should respect the pageSize parameter', () => {
+      const result = buildRecentFiles(commits, null, { page: 1, pageSize: 2 });
+      expect(result.data).toHaveLength(2);
+      expect(result.total).toBeGreaterThanOrEqual(2);
+    });
+
+    it('should paginate correctly', () => {
+      const page1 = buildRecentFiles(commits, null, {
+        page: 1,
+        pageSize: 2,
+      });
+      const page2 = buildRecentFiles(commits, null, {
+        page: 2,
+        pageSize: 2,
+      });
+      expect(page1.page).toBe(1);
+      expect(page2.page).toBe(2);
+      // Pages should not overlap
+      const page1Paths = page1.data.map((f) => f.path);
+      const page2Paths = page2.data.map((f) => f.path);
+      page2Paths.forEach((p) => {
+        expect(page1Paths).not.toContain(p);
+      });
     });
 
     it('should filter by author', () => {
       const result = buildRecentFiles(commits, 'bob@example.com');
 
-      result.forEach((f) => {
+      result.data.forEach((f) => {
         expect(f.authorEmail).toBe('bob@example.com');
       });
     });
 
-    it('should return empty array for empty commits', () => {
-      expect(buildRecentFiles([])).toEqual([]);
+    it('should return empty data for empty commits', () => {
+      const result = buildRecentFiles([]);
+      expect(result.data).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+  });
+
+  // ────────────────────────────────────────────────────────────────────────
+  // setRepoRoot / getRepoRoot
+  // ────────────────────────────────────────────────────────────────────────
+  describe('setRepoRoot / getRepoRoot', () => {
+    it('should update and retrieve the repo root', () => {
+      setRepoRoot('/tmp/my-repo');
+      expect(getRepoRoot()).toBe('/tmp/my-repo');
+    });
+
+    it('should allow setting to null', () => {
+      setRepoRoot(null);
+      expect(getRepoRoot()).toBeNull();
     });
   });
 

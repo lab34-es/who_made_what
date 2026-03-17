@@ -1,9 +1,25 @@
 import { execSync } from 'node:child_process';
 import path from 'node:path';
 
-// When run via CLI, the env var is set by bin/cli.js.
-// Falls back to process.cwd() for direct invocation.
-const REPO_ROOT = process.env.WHO_MADE_WHAT_REPO_ROOT || process.cwd();
+// Mutable repo root — set at runtime via setRepoRoot().
+// Falls back to the env var (for backwards compat) or null (no repo selected).
+let REPO_ROOT = process.env.WHO_MADE_WHAT_REPO_ROOT || null;
+
+/**
+ * Update the repository root path used by all git commands.
+ * @param {string} newRoot - Absolute path to a git repository.
+ */
+export function setRepoRoot(newRoot) {
+  REPO_ROOT = newRoot;
+}
+
+/**
+ * Get the current repository root path.
+ * @returns {string|null}
+ */
+export function getRepoRoot() {
+  return REPO_ROOT;
+}
 
 const DELIMITER = '<<--COMMIT-->>';
 const FIELD_SEP = '<<|>>';
@@ -326,7 +342,11 @@ export function buildByHour(commits, authorEmail = null) {
  * For each file, returns when it was last modified, who modified it, and
  * the number of lines added/removed in that last commit.
  */
-export function buildRecentFiles(commits, authorEmail = null, limit = 20) {
+export function buildRecentFiles(
+  commits,
+  authorEmail = null,
+  { page = 1, pageSize = 20 } = {},
+) {
   const filtered = filterByAuthor(commits, authorEmail);
 
   // commits are already sorted newest-first from git log
@@ -346,16 +366,26 @@ export function buildRecentFiles(commits, authorEmail = null, limit = 20) {
     }
   }
 
-  // Sort by date descending (most recent first) and take top N
-  return Array.from(seen.values())
-    .sort((a, b) => b.date.localeCompare(a.date))
-    .slice(0, limit);
+  // Sort by date descending (most recent first)
+  const all = Array.from(seen.values()).sort((a, b) =>
+    b.date.localeCompare(a.date),
+  );
+
+  const total = all.length;
+  const start = (page - 1) * pageSize;
+  const data = all.slice(start, start + pageSize);
+
+  return { data, total, page, pageSize };
 }
 
 /**
- * Top N most-modified files.
+ * Top N most-modified files (paginated).
  */
-export function buildTopFiles(commits, authorEmail = null, limit = 20) {
+export function buildTopFiles(
+  commits,
+  authorEmail = null,
+  { page = 1, pageSize = 20 } = {},
+) {
   const filtered = filterByAuthor(commits, authorEmail);
 
   const map = {};
@@ -368,8 +398,13 @@ export function buildTopFiles(commits, authorEmail = null, limit = 20) {
     }
   }
 
-  return Object.entries(map)
+  const all = Object.entries(map)
     .map(([filePath, stats]) => ({ path: filePath, ...stats }))
-    .sort((a, b) => b.commits - a.commits)
-    .slice(0, limit);
+    .sort((a, b) => b.commits - a.commits);
+
+  const total = all.length;
+  const start = (page - 1) * pageSize;
+  const data = all.slice(start, start + pageSize);
+
+  return { data, total, page, pageSize };
 }
