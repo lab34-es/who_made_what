@@ -25,26 +25,13 @@ Run a single command to get an instant visual dashboard of contribution activity
 
 All data stays local. Nothing is sent to any external server.
 
-## Setup
-
-Since this package is hosted on GitHub Packages, you need to configure npm to resolve the `@lab34` scope from the GitHub registry.
-
-Add the following to your project or user-level `.npmrc`:
-
-```
-@lab34:registry=https://npm.pkg.github.com
-```
-
-If the package is private, you also need to authenticate by adding a GitHub Personal Access Token (with `read:packages` scope) to `~/.npmrc`:
-
-```
-//npm.pkg.github.com/:_authToken=YOUR_GITHUB_TOKEN
-```
-
 ## Usage
 
 ```bash
-node bin/cli.js
+npx github:lab34-es/who_made_what
+
+# To use a different port (defaults to 4200)
+PORT=5678 npx github:lab34-es/who_made_what
 ```
 
 This will:
@@ -55,12 +42,6 @@ This will:
 4. Once a folder is selected, scan its full commit history and display the dashboard
 
 No arguments are required — the repository is selected interactively through the UI.
-
-To use a specific port:
-
-```bash
-PORT=8080 npx @lab34/who-made-what@latest
-```
 
 ## Requirements
 
