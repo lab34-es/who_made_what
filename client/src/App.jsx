@@ -82,6 +82,7 @@ export default function App() {
   const timelineUrl = !repoReady ? null : buildUrl('/api/activity/timeline', {
     branch,
     folder,
+    author: authorParam,
     since: dateFrom,
     until: dateTo,
   });
@@ -124,6 +125,13 @@ export default function App() {
     page: recentFilesPage,
     pageSize: recentFilesPageSize,
   });
+  const dailyBreakdownUrl = !repoReady ? null : buildUrl('/api/activity/daily-breakdown', {
+    branch,
+    folder,
+    author: authorParam,
+    since: dateFrom,
+    until: dateTo,
+  });
 
   const branches = useApi(branchUrl);
   const authors = useApi(authorsUrl);
@@ -134,6 +142,7 @@ export default function App() {
   const fileTypes = useApi(fileTypesUrl);
   const topFiles = useApi(topFilesUrl);
   const recentFiles = useApi(recentFilesUrl);
+  const dailyBreakdown = useApi(dailyBreakdownUrl);
 
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -149,6 +158,7 @@ export default function App() {
       fileTypes.refetch();
       topFiles.refetch();
       recentFiles.refetch();
+      dailyBreakdown.refetch();
     } finally {
       setRefreshing(false);
     }
@@ -162,6 +172,7 @@ export default function App() {
     fileTypes,
     topFiles,
     recentFiles,
+    dailyBreakdown,
   ]);
 
   const loading = authors.loading || heatmap.loading;
@@ -279,7 +290,12 @@ export default function App() {
         )}
 
         {/* Heatmap */}
-        {heatmap.data && <HeatmapChart data={heatmap.data} />}
+        {heatmap.data && (
+          <HeatmapChart
+            data={heatmap.data}
+            dailyBreakdown={dailyBreakdown.data || []}
+          />
+        )}
 
         {/* Charts grid */}
         <Box

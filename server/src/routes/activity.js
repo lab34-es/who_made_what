@@ -33,10 +33,11 @@ router.get('/heatmap', (req, res) => {
 });
 
 router.get('/timeline', (req, res) => {
-  const { branch, folder, since, until } = req.query;
+  const { branch, author, folder, since, until } = req.query;
   res.json(
     cache.getTimeline(
       branch || null,
+      parseAuthor(author),
       folder || null,
       since || null,
       until || null,
@@ -61,6 +62,19 @@ router.get('/by-hour', (req, res) => {
   const { branch, author, folder, since, until } = req.query;
   res.json(
     cache.getByHour(
+      branch || null,
+      parseAuthor(author),
+      folder || null,
+      since || null,
+      until || null,
+    ),
+  );
+});
+
+router.get('/daily-breakdown', (req, res) => {
+  const { branch, author, folder, since, until } = req.query;
+  res.json(
+    cache.getDailyBreakdown(
       branch || null,
       parseAuthor(author),
       folder || null,

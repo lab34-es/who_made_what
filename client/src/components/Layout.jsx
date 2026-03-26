@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import IconButton from '@mui/joy/IconButton';
@@ -7,6 +7,8 @@ import { useColorScheme } from '@mui/joy/styles';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import DarkModeIcon from '@mui/icons-material/DarkMode';
 import LightModeIcon from '@mui/icons-material/LightMode';
+import MenuIcon from '@mui/icons-material/Menu';
+import MenuOpenIcon from '@mui/icons-material/MenuOpen';
 import BranchFilter from './BranchFilter';
 import FolderBreadcrumb from './FolderBreadcrumb';
 import DateFilter from './DateFilter';
@@ -27,6 +29,7 @@ export default function Layout({
   children,
 }) {
   const { mode, setMode } = useColorScheme();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const toggleMode = () => {
     setMode(mode === 'dark' ? 'light' : 'dark');
@@ -52,12 +55,20 @@ export default function Layout({
           backdropFilter: 'blur(8px)',
         }}
       >
-        <Typography
-          level="h4"
-          sx={{ fontWeight: 600, color: 'text.primary', flexShrink: 0 }}
-        >
-          Who Made What
-        </Typography>
+        <Box sx={{ flexShrink: 0 }}>
+          <Typography
+            level="h4"
+            sx={{ fontWeight: 600, color: 'text.primary', lineHeight: 1.2 }}
+          >
+            Who Made What
+          </Typography>
+          <Typography
+            level="body-xs"
+            sx={{ color: 'neutral.500', fontWeight: 400 }}
+          >
+            developed by Lab34
+          </Typography>
+        </Box>
 
         <FolderBreadcrumb
           currentFolder={currentFolder}
@@ -78,6 +89,19 @@ export default function Layout({
           value={selectedBranch}
           onChange={onBranchChange}
         />
+
+        {sidebar && (
+          <Tooltip title={sidebarOpen ? 'Hide sidebar' : 'Show sidebar'}>
+            <IconButton
+              variant="outlined"
+              color="neutral"
+              size="sm"
+              onClick={() => setSidebarOpen((prev) => !prev)}
+            >
+              {sidebarOpen ? <MenuOpenIcon /> : <MenuIcon />}
+            </IconButton>
+          </Tooltip>
+        )}
 
         <Tooltip
           title={
@@ -116,7 +140,7 @@ export default function Layout({
         }}
       >
         {/* Sidebar */}
-        {sidebar && (
+        {sidebar && sidebarOpen && (
           <Box
             component="aside"
             sx={{

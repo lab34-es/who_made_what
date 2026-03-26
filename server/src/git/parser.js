@@ -275,10 +275,11 @@ export function buildHeatmap(commits, authorEmail = null) {
 /**
  * Build timeline data: commits per week, optionally grouped by author.
  */
-export function buildTimeline(commits) {
+export function buildTimeline(commits, authorEmail = null) {
+  const filtered = filterByAuthor(commits, authorEmail);
   const weekMap = {};
 
-  for (const c of commits) {
+  for (const c of filtered) {
     const d = new Date(c.date);
     // Get Monday of that week
     const day = d.getDay();
@@ -335,6 +336,54 @@ export function buildByHour(commits, authorEmail = null) {
     hour: `${String(hour).padStart(2, '0')}:00`,
     commits,
   }));
+}
+
+/**
+ * Daily breakdown: for each day, list contributors with commit count
+ * and lines added/removed. Days are sorted newest-first, contributors
+ * within each day sorted by commit count descending.
+ *
+ * @param {Array} commits
+ * @param {string|string[]|null} authorEmail
+ * @returns {Array<{ date: string, contributors: Array<{ name: string, email: string, commits: number, linesAdded: number, linesRemoved: number }> }>}
+ */
+export function buildDailyBreakdown(commits, authorEmail = null) {
+  const filtered = filterByAuthor(commits, authorEmail);
+
+  // Group by day, then by author
+  const dayMap = {};
+
+  for (const c of filtered) {
+    const day = c.date.slice(0, 10); // YYYY-MM-DD
+    if (!dayMap[day]) dayMap[day] = {};
+
+    const key = c.authorEmail;
+    if (!dayMap[day][key]) {
+      dayMap[day][key] = {
+        name: c.authorName,
+        email: c.authorEmail,
+        commits: 0,
+        linesAdded: 0,
+        linesRemoved: 0,
+      };
+    }
+
+    const entry = dayMap[day][key];
+    entry.commits += 1;
+    entry.linesAdded += c.totalAdded;
+    entry.linesRemoved += c.totalRemoved;
+    // Keep the most recent name
+    entry.name = c.authorName;
+  }
+
+  return Object.entries(dayMap)
+    .sort(([a], [b]) => b.localeCompare(a)) // newest first
+    .map(([date, authors]) => ({
+      date,
+      contributors: Object.values(authors).sort(
+        (a, b) => b.commits - a.commits,
+      ),
+    }));
 }
 
 /**

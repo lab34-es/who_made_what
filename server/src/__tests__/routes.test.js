@@ -185,13 +185,14 @@ describe('routes', () => {
         const mockData = [{ week: '2025-06-09', total: 5 }];
         mockCache.getTimeline.mockReturnValue(mockData);
 
-        const req = createReq({ branch: 'develop' });
+        const req = createReq({ branch: 'develop', author: 'alice@example.com' });
         const res = createRes();
 
         handler(req, res);
 
         expect(mockCache.getTimeline).toHaveBeenCalledWith(
           'develop',
+          'alice@example.com',
           null,
           null,
           null,

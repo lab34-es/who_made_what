@@ -1,8 +1,12 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import Box from '@mui/joy/Box';
 import Typography from '@mui/joy/Typography';
 import Tooltip from '@mui/joy/Tooltip';
 import Card from '@mui/joy/Card';
+import Tab from '@mui/joy/Tab';
+import TabList from '@mui/joy/TabList';
+import Tabs from '@mui/joy/Tabs';
+import DailyBreakdown from './DailyBreakdown';
 
 // These define the internal coordinate system of the SVG (viewBox units).
 // The actual rendered size is always 100% of the container width.
@@ -50,7 +54,9 @@ const DAY_LABELS = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
 const LEFT_PAD = 40;
 const TOP_PAD = 22;
 
-export default function HeatmapChart({ data = {} }) {
+export default function HeatmapChart({ data = {}, dailyBreakdown = [] }) {
+  const [activeTab, setActiveTab] = useState(0);
+
   const { weeks, maxCount, monthPositions } = useMemo(() => {
     const now = new Date();
     const endDate = new Date(now);
@@ -109,108 +115,145 @@ export default function HeatmapChart({ data = {} }) {
       <Typography level="title-sm" sx={{ mb: 1, color: TEXT_COLOR }}>
         Contribution Activity
       </Typography>
-      <Box sx={{ width: '100%' }}>
-        <svg
-          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          width="100%"
-          style={{ display: 'block' }}
-          preserveAspectRatio="xMidYMid meet"
-        >
-          {/* Day labels */}
-          {DAY_LABELS.map((label, i) =>
-            label ? (
-              <text
-                key={i}
-                x={0}
-                y={i * TOTAL_SIZE + TOP_PAD + CELL_SIZE - 1}
-                fill={TEXT_COLOR}
-                fontSize={12}
-                fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"
-              >
-                {label}
-              </text>
-            ) : null,
-          )}
 
-          {/* Month labels */}
-          {monthPositions.map(({ month, weekIdx }, i) => (
-            <text
-              key={i}
-              x={weekIdx * TOTAL_SIZE + LEFT_PAD}
-              y={12}
-              fill={TEXT_COLOR}
-              fontSize={12}
-              fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"
-            >
-              {MONTH_LABELS[month]}
-            </text>
-          ))}
-
-          {/* Cells */}
-          {weeks.map((week, wi) =>
-            week.map((day) => (
-              <Tooltip
-                key={day.date}
-                title={`${day.count} commit${day.count !== 1 ? 's' : ''} on ${day.date}`}
-                arrow
-                size="sm"
-              >
-                <rect
-                  x={wi * TOTAL_SIZE + LEFT_PAD}
-                  y={day.dayOfWeek * TOTAL_SIZE + TOP_PAD}
-                  width={CELL_SIZE}
-                  height={CELL_SIZE}
-                  rx={3}
-                  ry={3}
-                  fill={LEVELS[getLevel(day.count, maxCount)]}
-                  stroke={day.isToday ? '#57606a' : 'rgba(27, 31, 36, 0.06)'}
-                  strokeWidth={1}
-                  style={{
-                    cursor: 'default',
-                    shapeRendering: 'geometricPrecision',
-                  }}
-                />
-              </Tooltip>
-            )),
-          )}
-        </svg>
-      </Box>
-
-      {/* Legend - right-aligned to match GitHub */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          gap: 0.5,
-          mt: 0.5,
-        }}
+      <Tabs
+        value={activeTab}
+        onChange={(_, val) => setActiveTab(val)}
+        size="sm"
+        sx={{ bgcolor: 'transparent' }}
       >
-        <Typography
-          level="body-xs"
-          sx={{ color: TEXT_COLOR, mr: 0.5, fontSize: 12 }}
+        <TabList
+          variant="plain"
+          sx={{
+            '--ListItem-radius': '6px',
+            '--List-gap': '4px',
+            gap: 0.5,
+            mb: 1.5,
+          }}
         >
-          Less
-        </Typography>
-        {LEVELS.map((color, i) => (
+          <Tab
+            variant={activeTab === 0 ? 'soft' : 'plain'}
+            color={activeTab === 0 ? 'primary' : 'neutral'}
+          >
+            Graph
+          </Tab>
+          <Tab
+            variant={activeTab === 1 ? 'soft' : 'plain'}
+            color={activeTab === 1 ? 'primary' : 'neutral'}
+          >
+            Daily Breakdown
+          </Tab>
+        </TabList>
+      </Tabs>
+
+      {activeTab === 0 && (
+        <>
+          <Box sx={{ width: '100%' }}>
+            <svg
+              viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+              width="100%"
+              style={{ display: 'block' }}
+              preserveAspectRatio="xMidYMid meet"
+            >
+              {/* Day labels */}
+              {DAY_LABELS.map((label, i) =>
+                label ? (
+                  <text
+                    key={i}
+                    x={0}
+                    y={i * TOTAL_SIZE + TOP_PAD + CELL_SIZE - 1}
+                    fill={TEXT_COLOR}
+                    fontSize={12}
+                    fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"
+                  >
+                    {label}
+                  </text>
+                ) : null,
+              )}
+
+              {/* Month labels */}
+              {monthPositions.map(({ month, weekIdx }, i) => (
+                <text
+                  key={i}
+                  x={weekIdx * TOTAL_SIZE + LEFT_PAD}
+                  y={12}
+                  fill={TEXT_COLOR}
+                  fontSize={12}
+                  fontFamily="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif"
+                >
+                  {MONTH_LABELS[month]}
+                </text>
+              ))}
+
+              {/* Cells */}
+              {weeks.map((week, wi) =>
+                week.map((day) => (
+                  <Tooltip
+                    key={day.date}
+                    title={`${day.count} commit${day.count !== 1 ? 's' : ''} on ${day.date}`}
+                    arrow
+                    size="sm"
+                  >
+                    <rect
+                      x={wi * TOTAL_SIZE + LEFT_PAD}
+                      y={day.dayOfWeek * TOTAL_SIZE + TOP_PAD}
+                      width={CELL_SIZE}
+                      height={CELL_SIZE}
+                      rx={3}
+                      ry={3}
+                      fill={LEVELS[getLevel(day.count, maxCount)]}
+                      stroke={day.isToday ? '#57606a' : 'rgba(27, 31, 36, 0.06)'}
+                      strokeWidth={1}
+                      style={{
+                        cursor: 'default',
+                        shapeRendering: 'geometricPrecision',
+                      }}
+                    />
+                  </Tooltip>
+                )),
+              )}
+            </svg>
+          </Box>
+
+          {/* Legend - right-aligned to match GitHub */}
           <Box
-            key={i}
             sx={{
-              width: 12,
-              height: 12,
-              borderRadius: '3px',
-              bgcolor: color,
-              border: '1px solid rgba(27, 31, 36, 0.06)',
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: 0.5,
+              mt: 0.5,
             }}
-          />
-        ))}
-        <Typography
-          level="body-xs"
-          sx={{ color: TEXT_COLOR, ml: 0.5, fontSize: 12 }}
-        >
-          More
-        </Typography>
-      </Box>
+          >
+            <Typography
+              level="body-xs"
+              sx={{ color: TEXT_COLOR, mr: 0.5, fontSize: 12 }}
+            >
+              Less
+            </Typography>
+            {LEVELS.map((color, i) => (
+              <Box
+                key={i}
+                sx={{
+                  width: 12,
+                  height: 12,
+                  borderRadius: '3px',
+                  bgcolor: color,
+                  border: '1px solid rgba(27, 31, 36, 0.06)',
+                }}
+              />
+            ))}
+            <Typography
+              level="body-xs"
+              sx={{ color: TEXT_COLOR, ml: 0.5, fontSize: 12 }}
+            >
+              More
+            </Typography>
+          </Box>
+        </>
+      )}
+
+      {activeTab === 1 && <DailyBreakdown data={dailyBreakdown} />}
     </Card>
   );
 }

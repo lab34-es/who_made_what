@@ -8,6 +8,7 @@ import {
   buildByHour,
   buildTopFiles,
   buildRecentFiles,
+  buildDailyBreakdown,
   filterCommitsByFolder,
   filterCommitsByDate,
   listFolders,
@@ -122,8 +123,11 @@ class GitCache {
     );
   }
 
-  getTimeline(branch, folder, since, until) {
-    return buildTimeline(this._filter(branch, folder, since, until));
+  getTimeline(branch, authorEmail, folder, since, until) {
+    return buildTimeline(
+      this._filter(branch, folder, since, until),
+      authorEmail,
+    );
   }
 
   getByDay(branch, authorEmail, folder, since, until) {
@@ -147,6 +151,13 @@ class GitCache {
       this._filter(branch, folder, since, until),
       authorEmail,
       { page, pageSize },
+    );
+  }
+
+  getDailyBreakdown(branch, authorEmail, folder, since, until) {
+    return buildDailyBreakdown(
+      this._filter(branch, folder, since, until),
+      authorEmail,
     );
   }
 

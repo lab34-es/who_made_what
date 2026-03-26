@@ -10,6 +10,7 @@ const mockBuildByDay = jest.fn();
 const mockBuildByHour = jest.fn();
 const mockBuildTopFiles = jest.fn();
 const mockBuildRecentFiles = jest.fn();
+const mockBuildDailyBreakdown = jest.fn();
 const mockFilterCommitsByFolder = jest.fn();
 const mockFilterCommitsByDate = jest.fn();
 const mockListFolders = jest.fn();
@@ -25,6 +26,7 @@ jest.unstable_mockModule('../git/parser.js', () => ({
   buildByHour: mockBuildByHour,
   buildTopFiles: mockBuildTopFiles,
   buildRecentFiles: mockBuildRecentFiles,
+  buildDailyBreakdown: mockBuildDailyBreakdown,
   filterCommitsByFolder: mockFilterCommitsByFolder,
   filterCommitsByDate: mockFilterCommitsByDate,
   listFolders: mockListFolders,
@@ -284,8 +286,17 @@ describe('GitCache', () => {
       const expected = [{ week: '2025-06-09', total: 2 }];
       mockBuildTimeline.mockReturnValue(expected);
 
-      const result = cache.getTimeline(null, null, null, null);
-      expect(mockBuildTimeline).toHaveBeenCalledWith(sampleCommits);
+      const result = cache.getTimeline(
+        null,
+        'alice@example.com',
+        null,
+        null,
+        null,
+      );
+      expect(mockBuildTimeline).toHaveBeenCalledWith(
+        sampleCommits,
+        'alice@example.com',
+      );
       expect(result).toBe(expected);
     });
 
@@ -359,6 +370,31 @@ describe('GitCache', () => {
         sampleCommits,
         'a@a.com',
         { page: 1, pageSize: 10 },
+      );
+      expect(result).toBe(expected);
+    });
+
+    it('getDailyBreakdown delegates to buildDailyBreakdown', () => {
+      const expected = [
+        {
+          date: '2025-06-10',
+          contributors: [
+            { name: 'Alice', email: 'alice@example.com', commits: 1, linesAdded: 55, linesRemoved: 2 },
+          ],
+        },
+      ];
+      mockBuildDailyBreakdown.mockReturnValue(expected);
+
+      const result = cache.getDailyBreakdown(
+        null,
+        'alice@example.com',
+        null,
+        null,
+        null,
+      );
+      expect(mockBuildDailyBreakdown).toHaveBeenCalledWith(
+        sampleCommits,
+        'alice@example.com',
       );
       expect(result).toBe(expected);
     });
